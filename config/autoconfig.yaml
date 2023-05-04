@@ -1,0 +1,8 @@
+autoconfig:
+  env_prefix: BRODHA
+  test_connection: false
+  pretty_load: true
+  default_files:
+    - ./config/config.default.yaml
+  files:
+    - ./config/config.yaml
