@@ -1,6 +1,7 @@
 # frozen_string_literal: true
+
 module UserController
-  DEFAUL_LANG = 'es'.freeze
+  DEFAUL_LANG = 'es'
 
   def self.register_commands(bot)
     bot.register_command('/iniciar') do
@@ -18,14 +19,14 @@ module UserController
     end
 
     bot.register_command('/horarios_estudio',
-                         frequency: '¿Cada cuántos minutos te gustaría recibir una pregunta?')
-                           #  start: '¿A partir de qué hora te gustaría recibirlos? (hh:mm)',
-                           #  last: '¿A qué hora te gustaría dejar de recibirlos? (hh:mm)' do
+                         frequency: '¿Cada cuántos minutos te gustaría recibir una pregunta?') do
+      #  start: '¿A partir de qué hora te gustaría recibirlos? (hh:mm)',
+      #  last: '¿A qué hora te gustaría dejar de recibirlos? (hh:mm)' do
       user = current_bot_user
       schedule = user.reminder_schedule
       schedule.frequency = params[:frequency].to_i
       schedule.save
-      send_message('Preferencias guardadas')
+      send_message('Preferencias guardadas.')
     end
 
     bot.register_command('/help') do

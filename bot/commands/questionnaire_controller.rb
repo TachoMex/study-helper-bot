@@ -10,7 +10,6 @@ module QuestionnaireController
 
     bot.register_command('/ver_materias') do
       user = current_bot_user
-      log_info('User found', user: user.to_json)
       topics = user.topics.order(:name)
       if topics.empty?
         send_message('No tienes materias dadas de alta. Puedes añadir una con /agregar_materia')
@@ -30,12 +29,12 @@ module QuestionnaireController
         questionnaires = topic.questionnaires.order(:name)
         if questionnaires.empty?
           send_message("No tienes cuestionarios agregados pero puedes añadir el primero /agregar_cuestionario#{topic.id}")
-          next
+        else
+          questionnaires.each do |questionnaire|
+            send_message("#{questionnaire.name}\n⚙️ Configuración: /ver_configuraciones_cuestionario#{questionnaire.id}\n📄 Preguntas: /ver_preguntas#{questionnaire.id}")
+          end
         end
-        questionnaires.each do |questionnaire|
-          send_message("#{questionnaire.name}\n⚙️ Configuración: /ver_configuraciones_cuestionario#{questionnaire.id}\n📄 Preguntas: /ver_preguntas#{questionnaire.id}")
-        end
-        send_message("Añadir nuevo cuestionario: /agregar_cuestionario#{topic.id}}\nVer materias: /ver_materias")
+        send_message("#{topic.name}\nAñadir nuevo cuestionario: /agregar_cuestionario#{topic.id}}\nVer materias: /ver_materias")
       end
     end
 
@@ -55,16 +54,11 @@ module QuestionnaireController
     bot.register_command('/ver_preguntas', questionnaire_id: '¿Cuál es el id del cuestionario?') do
       user = current_bot_user
       log_info('Searching for questionnaire', questionnaire_id: params[:questionnaire_id])
-      questionnaire = user.questionnaires.find_by(id: params[:questionnaire_id])
-      if questionnaire.nil?
-        send_message('Cuestionario no encontrado.')
-        next
-      end
+      questionnaire = user.fetch_questionnaire!(params[:questionnaire_id])
 
       questions = questionnaire.questions
       if questions.empty?
-        send_message("No tienes preguntas en este cuestionario pero puedes añadir la primera /agregar_pregunta#{questionnaire.id}")
-        next
+        next send_message("No tienes preguntas en este cuestionario pero puedes añadir la primera /agregar_pregunta#{questionnaire.id}")
       end
 
       questions.each do |question|
@@ -77,27 +71,19 @@ module QuestionnaireController
     bot.register_command('/agregar_pregunta', questionnaire_id: '¿Cuál es el id del cuestionario?',
                                               contents: '¿Cuál es la pregunta/planteamiento?', answer: '¿Cuál es la respuesta?') do
       user = current_bot_user
-      questionnaire = user.questionnaires.find_by(id: params[:questionnaire_id])
-      if questionnaire.nil?
-        send_message('Cuestionario no encontrado.')
-        next
-      end
+      questionnaire = user.fetch_questionnaire!(params[:questionnaire_id])
 
       questionnaire.questions.create(created_at: Time.now, last_updated: Time.now, archived: false,
                                      contents: params[:contents], answer: params[:answer])
       send_message("Pregunta añadida. /ver_preguntas#{questionnaire.id}\nAgregar otra pregunta: /agregar_pregunta#{params[:questionnaire_id]}\n /ver_materias")
     end
 
-    bot.register_command('/recordatorios_activos') do
-    end
+    # bot.register_command('/recordatorios_activos') do
+    # end
 
     bot.register_command('/activar_recordatorios', questionnaire_id: '¿Cuál es el id del cuestionario?') do
       user = current_bot_user
-      questionnaire = user.questionnaires.find_by(id: params[:questionnaire_id])
-      if questionnaire.nil?
-        send_message('Cuestionario no encontrado.')
-        next
-      end
+      questionnaire = user.fetch_questionnaire!(params[:questionnaire_id])
 
       questionnaire.reminders_active = true
       questionnaire.save
@@ -107,13 +93,9 @@ module QuestionnaireController
 
     bot.register_command('/desactivar_recordatorios', questionnaire_id: '¿Cuál es el id del cuestionario?') do
       user = current_bot_user
-      questionnaire = user.questionnaires.find_by(id: params[:questionnaire_id])
-      if questionnaire.nil?
-        send_message('Cuestionario no encontrado.')
-        next
-      end
+      questionnaire = user.fetch_questionnaire!(params[:questionnaire_id])
 
-      questionnaire.reminders_active = true
+      questionnaire.reminders_active = false
       questionnaire.save
       send_message('Recordatorios desactivados')
     end

@@ -30,9 +30,9 @@ module BrodhaBot
         end
       end
 
-      rescue_from(::BrodhaBot::Base::UserNotRegistered) do
-        send_message('Por favor inicia el bot /iniciar')
-      end
+      rescue_from(::BrodhaBot::Base::UserNotRegistered) { send_message('Por favor inicia el bot /iniciar') }
+
+      rescue_from(::User::QuestionnaireNotFound) { send_message('Cuestionario no encontrado.') }
 
       rescue_from(StandardError) do
         log_error('Unexpected error in bot', error: params[:_last_exception], trace: params[:_last_exception].backtrace)

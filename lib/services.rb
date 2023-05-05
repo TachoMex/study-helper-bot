@@ -26,9 +26,11 @@ module Services
       configure_active_record!
     end
 
+    # :nocov:
     def bot
       @bot ||= bot = BrodhaBot::Base.new(Services.conf['bots']['main'])
     end
+    # :nocov:
 
     def sequel_connection_for_active_record
       data = conf['active_record'].clone
@@ -44,6 +46,15 @@ module Services
 
     def configure_active_record!
       ActiveRecord::Base.establish_connection(conf['active_record'])
+    end
+
+    def run_migrations!
+      require 'kybus/bot/migrator'
+      require 'sequel/core'
+      configure_services!
+      Kybus::Bot::Migrator.run_migrations!(bot_database)
+      Sequel.extension :migration
+      Sequel::Migrator.run(Services.sequel_connection_for_active_record, 'models/migrations')
     end
   end
 end

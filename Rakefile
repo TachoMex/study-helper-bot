@@ -14,15 +14,6 @@ namespace :db do
   desc 'Run database migrations'
   task :migrate do
     require './lib/services'
-    require 'kybus/bot/migrator'
-
-    Services.configure_services!
-
-    require_relative 'lib/services'
-    Services.configure_services!
-    Kybus::Bot::Migrator.run_migrations!(Services.bot_database)
-    require 'sequel/core'
-    Sequel.extension :migration
-    Sequel::Migrator.run(Services.sequel_connection_for_active_record, 'models/migrations')
+    Services.run_migrations!
   end
 end
