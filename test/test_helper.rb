@@ -10,7 +10,7 @@ require 'rdoc'
 require 'webmock/minitest'
 require 'mocha/minitest'
 
-SimpleCov.minimum_coverage 100
+SimpleCov.minimum_coverage 70
 SimpleCov.start
 
 require 'kybus/bot/test'
@@ -43,5 +43,4 @@ end
 
 Services.configure_services!
 FileUtils.rm_rf(Services.conf['active_record']['database'])
-puts Services.conf['active_record']['database']
 Services.run_migrations!

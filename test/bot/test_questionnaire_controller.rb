@@ -39,7 +39,7 @@ module BrodhaBot
 
     def test_view_topic_not_found
       register_user
-      msg = @bot.receives("/ver_materia#{-1}")
+      msg = @bot.receives('/ver_materia-1')
       assert_equal('Materia no encontrada.', msg.raw_message)
     end
 
@@ -47,7 +47,7 @@ module BrodhaBot
       @bot.receives("/agregar_cuestionario#{topic}")
       questionnaire = @bot.receives('Preguntas 1')
       assert_equal('Cuestionario añadido.', questionnaire.raw_message[0..20])
-      questionnaire_command = questionnaire.raw_message[/\/ver_preguntas\d+/, 0]
+      questionnaire_command = questionnaire.raw_message[%r{/ver_preguntas\d+}, 0]
       refute_nil(questionnaire_command)
       questionnaire_command.gsub('/ver_preguntas', '').to_i
     end
@@ -74,7 +74,7 @@ module BrodhaBot
       questionnaire = Questionnaire.find(questionnaire_id)
       assert_equal(questionnaire.reminders_active, 0)
     end
-    
+
     def test_add_questions
       register_user
       topic = register_topic('programming')
@@ -90,10 +90,9 @@ module BrodhaBot
 
     def test_add_questionnaire_subject_not_found
       register_user
-      @bot.receives("/agregar_cuestionario-1")
+      @bot.receives('/agregar_cuestionario-1')
       questionnaire = @bot.receives('Preguntas 1')
       refute_equal('Cuestionario añadido.', questionnaire.raw_message[0..20])
     end
-
   end
 end
