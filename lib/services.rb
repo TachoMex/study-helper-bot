@@ -40,8 +40,12 @@ module Services
       @sequel_connection_for_active_record ||= Sequel.connect(data)
     end
 
+    def bot_state_config
+      Services.conf['bots']['main']['state_repository']
+    end
+
     def bot_database
-      @bot_database ||= Sequel.connect(Services.conf['bots']['main']['state_repository']['endpoint'])
+      @bot_database ||= Sequel.connect(bot_state_config['endpoint'])
     end
 
     def configure_active_record!
@@ -52,7 +56,7 @@ module Services
       require 'kybus/bot/migrator'
       require 'sequel/core'
       configure_services!
-      Kybus::Bot::Migrator.run_migrations!(bot_database)
+      Kybus::Bot::Migrator.run_migrations!(bot_database) if bot_state_config['name'] == 'sequel'
       Sequel.extension :migration
       Sequel::Migrator.run(Services.sequel_connection_for_active_record, 'models/migrations')
     end

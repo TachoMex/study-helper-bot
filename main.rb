@@ -2,7 +2,6 @@
 
 require 'awesome_print'
 require 'kybus/logger'
-require_relative 'lib/cron'
 require_relative 'lib/services'
 
 # :nocov:
