@@ -1,0 +1,4 @@
+storage/**/*
+config/config.yaml
+.env.default
+.env

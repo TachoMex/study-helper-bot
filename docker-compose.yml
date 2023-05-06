@@ -1,0 +1,42 @@
+version: '3.7'
+services:
+  bot:
+    build: .
+    volumes: 
+      - ./storage:/app/storage
+      - ./:/app/
+    environment: 
+      BRODHA_ACTIVE_RECORD__ADAPTER: postgresql
+      BRODHA_ACTIVE_RECORD__HOST: db
+      BRODHA_ACTIVE_RECORD__USER: postgres
+      BRODHA_ACTIVE_RECORD__PASSWORD: postgres
+      BRODHA_ACTIVE_RECORD__DATABASE: bot
+      BRODHA_BOTS__MAIN__STATE_REPOSITORY__NAME: sequel
+      BRODHA_BOTS__MAIN__STATE_REPOSITORY__ENDPOINT__HOST: db
+      BRODHA_BOTS__MAIN__STATE_REPOSITORY__ENDPOINT__USER: postgres
+      BRODHA_BOTS__MAIN__STATE_REPOSITORY__ENDPOINT__PASSWORD: postgres
+      BRODHA_BOTS__MAIN__STATE_REPOSITORY__ENDPOINT__ADAPTER: postgres
+      BRODHA_BOTS__MAIN__STATE_REPOSITORY__ENDPOINT__DATABASE: bot
+      BRODHA_BOTS__MAIN__INLINE_ARGS: true
+      BRODHA_BOTS__MAIN__POOL_SIZE: 1
+    depends_on:
+      - db
+    env_file: .env
+  db:
+    image: postgres:15.2-alpine
+    restart: always
+    healthcheck:
+      test: "pg_isready --username=postgres && psql --username=postgres --list"
+      timeout: 10s
+      retries: 20
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    # ports:
+    #   - '5432:5432'
+    volumes: 
+      - db:/var/lib/postgresql/data
+      - ./models/init_db.sql:/docker-entrypoint-initdb.d/init.sql
+volumes:
+  db:
+    driver: local 

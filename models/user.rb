@@ -12,13 +12,12 @@ class User < ActiveRecord::Base
   class QuestionnaireNotFound < StandardError
   end
 
-
   def premium?
     premium == true
   end
 
   def fetch_questionnaire!(id)
-    questionnaires.find_by(id: id) || raise(QuestionnaireNotFound)
+    questionnaires.find_by(id:) || raise(QuestionnaireNotFound)
   end
 
   serialize :other_settings, JSON

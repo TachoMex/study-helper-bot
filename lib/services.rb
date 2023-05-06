@@ -19,7 +19,7 @@ module Services
     attr_reader :conf, :conf_manager, :services
 
     def configure_services!
-      Dir.mkdir('storage') unless Dir.exist?('storage')
+      FileUtils.mkdir_p('storage')
       @conf_manager = Kybus::Configuration.auto_load!
       @conf = @conf_manager.configs
       @services = @conf_manager.all_services

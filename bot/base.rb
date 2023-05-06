@@ -45,37 +45,6 @@ module BrodhaBot
       SIIAUAvailabilityController.register_commands(self)
     end
 
-    def run_reminders_daemon
-      loop do
-        current_time = Time.now.strftime('%H:%M')
-        query = <<-SQL
-          SELECT user_id
-          FROM   reminder_schedules
-          WHERE  begin_reminders_at < ?
-            AND  finish_reminders_at > ?
-            AND  (last_question_sent_at IS NULL OR DATETIME(last_question_sent_at, frequency || ' minutes' ) < ?)
-        SQL
-        sanitized = ActiveRecord::Base.send(:sanitize_sql_array,
-                                            [query, current_time, current_time, Time.now.to_s[..-7]])
-        ActiveRecord::Base.connection.execute(sanitized).each do |user_id|
-          user = User.find(user_id['user_id'])
-          log_info('Sending remider to user', user: user.id)
-          questionnaire = user.questionnaires.with_reminders.order('RANDOM()').limit(1).first
-          question = questionnaire.questions.order('RANDOM()').limit(1).first
-          message = send_message(user.channel_id,
-                                 "Pregunta para repasar 🤓.\nHablemos de #{questionnaire.topic.name}. \n#{questionnaire.name}:\n#{question.contents}")
-          reminders = user.reminder_schedule
-          reminders.last_question_sent_at = Time.now.to_s[..-7]
-          reminders.save
-          user.reminder_replies.create(question_id: question.id, message_id: message.message_id, created_at: Time.now,
-                                       last_updated: Time.now)
-          log_info('Message sent to user', message_id: message.message_id)
-        end
-
-        sleep(60)
-      end
-    end
-
     def run_files_daemon
       file = PendingFileUpload.where(status: 0).first
       if file
@@ -89,7 +58,7 @@ module BrodhaBot
           file.save!
         rescue StandardError
           file.retries += 1
-          file.status = 2 if retries >= 3
+          file.status = 2 if file.retries >= 3
           file.save!
           raise
         end

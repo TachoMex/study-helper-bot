@@ -41,7 +41,7 @@ class VideoDownloader
 
   def list_file_expand(list, path, formats)
     File.readlines(list)
-        .map { |line| line.strip.split(' ')[1] }
+        .map { |line| line.strip.split[1] }
         .map { |file| Dir.glob(formats.map { |format| "#{@base_path}/#{path}/*#{file}*.#{format}" }).first }
         .compact
   end

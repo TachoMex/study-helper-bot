@@ -1,8 +1,6 @@
 # frozen_string_literal: true
 
 class ShellExecutor
-  def initialize; end
-
   def run(command, args)
     cmd = "#{Shellwords.escape(command)} #{expand_args(args)}"
     puts "Running shell command: #{cmd}"
