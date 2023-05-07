@@ -11,7 +11,7 @@ module BrodhaBot
 
     def test_create_subject
       register_user
-      assert_difference('Topic.count') do
+      check_difference('Topic.count') do
         register_topic('programming')
       end
     end
@@ -60,7 +60,7 @@ module BrodhaBot
     def add_question(questionnaire_id)
       @bot.receives("/agregar_pregunta#{questionnaire_id}")
       @bot.receives('1+1?')
-      assert_difference('Question.count') do
+      check_difference('Question.count') do
         question_added = @bot.receives('2')
         assert_equal('Pregunta añadida.', question_added.raw_message[0..16])
       end
@@ -72,13 +72,14 @@ module BrodhaBot
       assert(questionnaire.reminders_active)
       @bot.receives("/desactivar_recordatorios#{questionnaire_id}")
       questionnaire = Questionnaire.find(questionnaire_id)
-      assert_equal(questionnaire.reminders_active, 0)
+      assert_equal(questionnaire.reminders_active, false)
     end
 
     def test_add_questions
       register_user
       topic = register_topic('programming')
-      assert_difference('Questionnaire.count') do
+      assert_equal(Questionnaire.count, 0)
+      check_difference('Questionnaire.count') do
         questionnaire_id = add_questionnaire(topic)
         assert_empty_questionnaire(questionnaire_id)
         add_question(questionnaire_id)

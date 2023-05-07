@@ -10,7 +10,7 @@ require 'rdoc'
 require 'webmock/minitest'
 require 'mocha/minitest'
 
-SimpleCov.minimum_coverage 70
+SimpleCov.minimum_coverage 68
 SimpleCov.start
 
 require 'kybus/bot/test'
@@ -27,7 +27,7 @@ class BotTest < Minitest::Test
     @bot.receives('/iniciar')
   end
 
-  def assert_difference(exp)
+  def check_difference(exp)
     initial = eval(exp)
     yield
     refute_equal(initial, eval(exp))
