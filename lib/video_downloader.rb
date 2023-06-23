@@ -24,6 +24,7 @@ class VideoDownloader
 
   def get_audio(url, save_at)
     list_file = "#{@base_path}/#{save_at}/#{random_string}.txt"
+    FileUtils.mkdir_p("#{@base_path}/#{save_at}")
     FileUtils.touch(list_file)
     shell_executer.run('yt-dlp',
                        '-o' => "#{@base_path}/#{save_at}/%(title)s-%(id)s.%(ext)s",

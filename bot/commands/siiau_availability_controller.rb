@@ -110,8 +110,9 @@ module SIIAUAvailabilityController
       if found
         log_info('Found available course', found:)
         user = search.user
-        send_message(user.channel_id,
-                     "¡Cupo encontrado! #{search.subject} #{search.nrc} \nMarcar como cerrado: /cerrar_cupo#{search.id}")
+        send_message(
+          "¡Cupo encontrado! #{search.subject} #{search.nrc} #{found[:available]} disponibles \nMarcar como cerrado: /cerrar_cupo#{search.id}", user.channel_id
+        )
       else
         log_info('SIIAU Not found', nrc: search.nrc, id: search.id, found:)
       end

@@ -5,9 +5,13 @@ require './lib/video_downloader'
 require_relative 'commands/media_download_controller'
 require_relative 'commands/user_controller'
 require_relative 'commands/questionnaire_controller'
+require_relative 'commands/animals_game_controller'
 require_relative 'commands/siiau_availability_controller'
 
 module BrodhaBot
+  class AbortBot < StandardError
+  end
+
   class Base < Kybus::Bot::Base
     class UserNotRegistered < StandardError
     end
@@ -30,6 +34,8 @@ module BrodhaBot
         end
       end
 
+      rescue_from(::BrodhaBot::AbortBot) { send_message(params[:_last_exception].message) }
+
       rescue_from(::BrodhaBot::Base::UserNotRegistered) { send_message('Por favor inicia el bot /iniciar') }
 
       rescue_from(::User::QuestionnaireNotFound) { send_message('Cuestionario no encontrado.') }
@@ -43,6 +49,7 @@ module BrodhaBot
       QuestionnaireController.register_commands(self)
       UserController.register_commands(self)
       SIIAUAvailabilityController.register_commands(self)
+      AnimalsGameController.register_commands(self)
     end
 
     def run_files_daemon
@@ -69,7 +76,8 @@ module BrodhaBot
     end
 
     def start_daemons!
-      %i[run_reminders_daemon run_files_daemon run_siiau_daemon].each do |daemon|
+      %i[run_reminders_daemon run_files_daemon run_siiau_daemon run_pending_downloads_daemon
+         run_pending_downloads_daemon].each do |daemon|
         Thread.new do
           loop do
             Services.bot.send(daemon)

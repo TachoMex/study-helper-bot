@@ -8,6 +8,7 @@ class User < ActiveRecord::Base
   has_many :reminder_replies
   has_many :pending_file_uploads
   has_many :siiau_searches
+  has_many :pending_downloads
 
   class QuestionnaireNotFound < StandardError
   end

@@ -31,7 +31,7 @@ module MediaDownloaderController
   def pending_reminders_query
     adapter = ActiveRecord::Base.connection.adapter_name
     case adapter
-    when 'sqlite3'
+    when 'SQLite'
       <<-SQL
         SELECT user_id
         FROM   reminder_schedules
@@ -81,10 +81,44 @@ module MediaDownloaderController
     end
   end
 
+  def run_pending_downloads_daemon
+    loop do
+      log_info('Running downloads daemon')
+      PendingDownload.where(status: 0).each do |download|
+        log_info('Trying to download', url: download.url, user: download.user, format: download.format)
+        download.status = 1
+        download.save!
+        download_and_send_video(download.url, download.format, download.user)
+        download.status = 2
+        download.save!
+      rescue StandardError => _e
+        if download.retries <= 3
+          download.retries += 1
+        else
+          download.status = 3
+        end
+        download.save!
+      end
+      sleep(60)
+    end
+  end
+
   def self.register_commands(bot)
     bot.extend(MediaDownloaderController)
     bot.register_command(URI::DEFAULT_PARSER.make_regexp, format: '/audio /video /cancel') do
-      download_and_send_video(command_name, params[:format], current_user)
+      user = current_bot_user
+      if user.premium?
+        user.pending_downloads.create(
+          url: command_name,
+          format: params[:format],
+          status: 0,
+          created_at: Time.now,
+          last_updated: Time.now
+        )
+        send_message('Descargando...')
+      else
+        send_message('Esto sólo está disponible para usuarios premium')
+      end
     end
   end
 end

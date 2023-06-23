@@ -19,6 +19,7 @@ services:
       BRODHA_BOTS__MAIN__STATE_REPOSITORY__ENDPOINT__DATABASE: bot
       BRODHA_BOTS__MAIN__INLINE_ARGS: true
       BRODHA_BOTS__MAIN__POOL_SIZE: 1
+      BRODHA_BOTS__MAIN__PROVIDER__PARSE_MODE: Markdown 
     depends_on:
       - db
     env_file: .env

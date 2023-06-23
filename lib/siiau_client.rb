@@ -33,6 +33,8 @@ class SIIAUCLient < Kybus::Client::RESTClient
   end
 
   def search_for_availability(cycle:, program:, nrc:, center:, subject:)
-    search_for_subject(cycle, subject.upcase, center.upcase, program.upcase).find { |result| result[:nrc] == nrc }
+    search_for_subject(cycle, subject.upcase, center.upcase, program.upcase).find do |result|
+      result[:nrc] == nrc && result[:available].positive?
+    end
   end
 end

@@ -68,7 +68,7 @@ GEM
       concurrent-ruby (~> 1.0)
     ice_nine (0.11.2)
     json (2.6.3)
-    kybus-bot (0.8.1)
+    kybus-bot (0.8.2)
       kybus-core (~> 0.1)
     kybus-client (0.1.0)
       kybus-core (~> 0.1)

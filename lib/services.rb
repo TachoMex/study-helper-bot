@@ -12,6 +12,8 @@ require './models/topic'
 require './models/user'
 require './models/reminder_reply'
 require './models/pending_file_upload'
+require './models/game_session'
+require './models/pending_download'
 require './models/siiau_search'
 
 module Services
@@ -28,7 +30,7 @@ module Services
 
     # :nocov:
     def bot
-      @bot ||= bot = BrodhaBot::Base.new(Services.conf['bots']['main'])
+      @bot ||= BrodhaBot::Base.new(Services.conf['bots']['main'])
     end
     # :nocov:
 
