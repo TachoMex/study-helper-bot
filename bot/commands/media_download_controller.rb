@@ -85,10 +85,10 @@ module MediaDownloaderController
     loop do
       log_info('Running downloads daemon')
       PendingDownload.where(status: 0).each do |download|
-        log_info('Trying to download', url: download.url, user: download.user, format: download.format)
+        log_info('Trying to download', url: download.url, user: download.user.id, format: download.format)
         download.status = 1
         download.save!
-        download_and_send_video(download.url, download.format, download.user)
+        download_and_send_video(download.url, download.format, download.user.id)
         download.status = 2
         download.save!
       rescue StandardError => _e

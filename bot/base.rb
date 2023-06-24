@@ -53,25 +53,27 @@ module BrodhaBot
     end
 
     def run_files_daemon
-      file = PendingFileUpload.where(status: 0).first
-      if file
-        begin
-          type = "send_#{file.media_type}".to_sym
-          channel = file.user.channel_id
-          log_info('Seding upload', path: file.file_path, type:, channel:)
-          dsl.send(type, file.file_path, channel)
-          sleep(1)
-          file.status = 1
-          file.save!
-        rescue StandardError
-          file.retries += 1
-          file.status = 2 if file.retries >= 3
-          file.save!
-          raise
+      loop do
+        file = PendingFileUpload.where(status: 0).first
+        if file
+          begin
+            type = "send_#{file.media_type}".to_sym
+            channel = file.user.channel_id
+            log_info('Seding upload', path: file.file_path, type:, channel:)
+            dsl.send(type, file.file_path, channel)
+            sleep(1)
+            file.status = 1
+            file.save!
+          rescue StandardError
+            file.retries += 1
+            file.status = 2 if file.retries >= 3
+            file.save!
+            raise
+          end
+        else
+          log_info('Waiting for files')
+          sleep(60)
         end
-      else
-        log_info('Waiting for files')
-        sleep(60)
       end
     end
 
