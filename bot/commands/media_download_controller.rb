@@ -3,15 +3,15 @@
 module MediaDownloaderController
   DEFAULT_STORAGE = './storage'
 
-  def download_and_send_video(url, format, path)
+  def download_and_send_video(user_id, url, format, path)
     case format
     when '/audio'
       files = downloader.get_audio(url, path)
-      files.each { |file| async_file_send(current_bot_user, 'audio', file) }
+      files.each { |file| async_file_send(user_id, 'audio', file) }
       dsl.send(:send_message, 'Unsupported or no videos found') if files.empty?
     when '/video'
       files = downloader.get(url, path)
-      files.each { |file| async_file_send(current_bot_user, 'video', file) }
+      files.each { |file| async_file_send(user_id, 'video', file) }
       dsl.send(:send_message, 'Unsupported or no videos found') if files.empty?
     when '/cancel'
       send_message('cancelled')
@@ -22,9 +22,9 @@ module MediaDownloaderController
     @downloader ||= VideoDownloader.new(DEFAULT_STORAGE)
   end
 
-  def async_file_send(user, type, path)
+  def async_file_send(user_id, type, path)
     log_info('Enqueuing file download', file: path)
-    user.pending_file_uploads.create(media_type: type, file_path: path, storage_type: 'local', status: 0, retries: 0,
+    User.find(user_id).pending_file_uploads.create(media_type: type, file_path: path, storage_type: 'local', status: 0, retries: 0,
                                      last_updated: Time.now, created_at: Time.now)
   end
 
@@ -88,12 +88,14 @@ module MediaDownloaderController
         log_info('Trying to download', url: download.url, user: download.user.id, format: download.format)
         download.status = 1
         download.save!
-        download_and_send_video(download.url, download.format, download.user.id)
+        download_and_send_video(download.user.id, download.url, download.format, download.user.id)
         download.status = 2
         download.save!
-      rescue StandardError => _e
+      rescue StandardError => e
+        log_error('Error at download', error: e, trace: e.backtrace)
         if download.retries <= 3
           download.retries += 1
+          download.status = 0
         else
           download.status = 3
         end
