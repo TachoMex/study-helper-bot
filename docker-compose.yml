@@ -1,6 +1,6 @@
 version: '3.7'
 services:
-  bot:
+  bot: &bot_base
     build: .
     volumes: 
       - ./storage:/app/storage
@@ -11,6 +11,7 @@ services:
       BRODHA_ACTIVE_RECORD__USER: postgres
       BRODHA_ACTIVE_RECORD__PASSWORD: postgres
       BRODHA_ACTIVE_RECORD__DATABASE: bot
+      BRODHA_ACTIVE_RECORD__POOL: 10
       BRODHA_BOTS__MAIN__STATE_REPOSITORY__NAME: sequel
       BRODHA_BOTS__MAIN__STATE_REPOSITORY__ENDPOINT__HOST: db
       BRODHA_BOTS__MAIN__STATE_REPOSITORY__ENDPOINT__USER: postgres
@@ -23,6 +24,18 @@ services:
     depends_on:
       - db
     env_file: .env
+  reminders:
+    <<: *bot_base
+    command: bundle exec rake daemons:reminders
+  downloader:
+    <<: *bot_base
+    command: bundle exec rake daemons:downloader
+  file_uploader:
+    <<: *bot_base
+    command: bundle exec rake daemons:file_uploader
+  siiau:
+    <<: *bot_base
+    command: bundle exec rake daemons:siiau
   db:
     image: postgres:15.2-alpine
     restart: always

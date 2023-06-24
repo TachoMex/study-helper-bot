@@ -17,3 +17,30 @@ namespace :db do
     Services.run_migrations!
   end
 end
+
+namespace :daemons do
+  desc 'Run daemons'
+  task :reminders do
+    require './lib/services'
+    Services.configure_services!
+    Services.bot.run_reminders_daemon
+  end
+
+  task :file_uploader do
+    require './lib/services'
+    Services.configure_services!
+    Services.bot.run_files_daemon
+  end
+
+  task :downloader do
+    require './lib/services'
+    Services.configure_services!
+    Services.bot.run_pending_downloads_daemon
+  end
+
+  task :siiau do
+    require './lib/services'
+    Services.configure_services!
+    Services.bot.run_siiau_daemon
+  end
+end

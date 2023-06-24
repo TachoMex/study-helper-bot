@@ -89,11 +89,6 @@ module BrodhaBot
       end
     end
 
-    def run
-      start_daemons!
-      super
-    end
-
     def bot_started?
       user = User.find_by(channel_id: dsl.current_channel)
       !!user
