@@ -52,59 +52,61 @@ module BrodhaBot
       AnimalsGameController.register_commands(self)
     end
 
-    def run_files_daemon
-      loop do
-        file = PendingFileUpload.where(status: 0).first
-        if file
-          begin
-            type = "send_#{file.media_type}".to_sym
-            channel = file.user.channel_id
-            log_info('Seding upload', path: file.file_path, type:, channel:)
-            dsl.send(type, file.file_path, channel)
-            sleep(1)
-            file.status = 1
-            file.save!
-          rescue StandardError
-            file.retries += 1
-            file.status = 2 if file.retries >= 3
-            file.save!
-            raise
-          end
-        else
-          log_info('Waiting for files')
-          sleep(60)
-        end
-      end
-    end
-
-    def start_daemons!
-      %i[run_reminders_daemon run_files_daemon run_siiau_daemon run_pending_downloads_daemon
-         run_pending_downloads_daemon].each do |daemon|
-        Thread.new do
-          loop do
-            Services.bot.send(daemon)
-          rescue StandardError => e
-            log_error('Error in daemon', daemon:, e:, trace: e.backtrace)
+    helpers do
+      def run_files_daemon
+        loop do
+          file = PendingFileUpload.where(status: 0).first
+          if file
+            begin
+              type = "send_#{file.media_type}".to_sym
+              channel = file.user.channel_id
+              log_info('Seding upload', path: file.file_path, type:, channel:)
+              send(type, file.file_path, channel)
+              sleep(1)
+              file.status = 1
+              file.save!
+            rescue StandardError
+              file.retries += 1
+              file.status = 2 if file.retries >= 3
+              file.save!
+              raise
+            end
+          else
+            log_info('Waiting for files')
             sleep(60)
           end
         end
       end
-    end
 
-    def bot_started?
-      user = User.find_by(channel_id: dsl.current_channel)
-      !!user
-    end
+      def start_daemons!
+        %i[run_reminders_daemon run_files_daemon run_siiau_daemon run_pending_downloads_daemon
+          run_pending_downloads_daemon].each do |daemon|
+          Thread.new do
+            loop do
+              Services.bot.send(daemon)
+            rescue StandardError => e
+              log_error('Error in daemon', daemon:, e:, trace: e.backtrace)
+              sleep(60)
+            end
+          end
+        end
+      end
 
-    def current_bot_user
-      user = User.find_by(channel_id: dsl.current_channel)
-      raise UserNotRegistered if user.nil?
+      def bot_started?
+        user = User.find_by(channel_id: current_channel)
+        !!user
+      end
 
-      user
-    end
+      def current_bot_user
+        user = User.find_by(channel_id: current_channel)
+        raise UserNotRegistered if user.nil?
 
-    def premium_user?
-      current_bot_user.premium?
+        user
+      end
+
+      def premium_user?
+        current_bot_user.premium?
+      end
     end
   end
 end
