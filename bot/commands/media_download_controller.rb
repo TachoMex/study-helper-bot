@@ -3,16 +3,17 @@
 module MediaDownloaderController
   DEFAULT_STORAGE = './storage'
 
-  def download_and_send_video(user_id, url, format, path)
+  def download_and_send_video(user, url, format, path)
+    user_id = user.id
     case format
     when '/audio'
       files = downloader.get_audio(url, path)
       files.each { |file| async_file_send(user_id, 'audio', file) }
-      dsl.send(:send_message, 'Unsupported or no videos found') if files.empty?
+      send(:send_message, 'Unsupported or no videos found', user.channel_id) if files.empty?
     when '/video'
       files = downloader.get(url, path)
       files.each { |file| async_file_send(user_id, 'video', file) }
-      dsl.send(:send_message, 'Unsupported or no videos found') if files.empty?
+      send(:send_message, 'Unsupported or no videos found', user.channel_id) if files.empty?
     when '/cancel'
       send_message('cancelled')
     end
@@ -88,7 +89,7 @@ module MediaDownloaderController
         log_info('Trying to download', url: download.url, user: download.user.id, format: download.format)
         download.status = 1
         download.save!
-        download_and_send_video(download.user.id, download.url, download.format, download.user.id)
+        download_and_send_video(download.user, download.url, download.format, download.user.id)
         download.status = 2
         download.save!
       rescue StandardError => e

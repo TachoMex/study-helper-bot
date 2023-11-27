@@ -1,6 +1,6 @@
 GIT
   remote: https://github.com/tachomex/kybus.git
-  revision: 11c15e49116eb8f329d355e6909c9a4034f4b136
+  revision: 66ec9bd4a977c21e1e257a09da98e2930c8857d0
   branch: botsidekiq
   glob: kybus-bot/kybus-bot.gemspec
   specs:
