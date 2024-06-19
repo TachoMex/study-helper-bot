@@ -7,7 +7,6 @@ class User < ActiveRecord::Base
   has_one :reminder_schedule
   has_many :reminder_replies
   has_many :pending_file_uploads
-  has_many :siiau_searches
   has_many :pending_downloads
 
   class QuestionnaireNotFound < StandardError
@@ -21,5 +20,5 @@ class User < ActiveRecord::Base
     questionnaires.find_by(id:) || raise(QuestionnaireNotFound)
   end
 
-  serialize :other_settings, JSON
+  serialize :other_settings, coder: JSON
 end

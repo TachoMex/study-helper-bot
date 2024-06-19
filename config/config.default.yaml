@@ -2,6 +2,6 @@ features: {}
 logger:
   stdout: yes
   severity: debug
-# active_record:
-#   adapter: postgres
-  # database: storage/brodha.db
+active_record:
+  adapter: sqlite3
+  database: storage/brodha.db

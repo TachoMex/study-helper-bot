@@ -1,0 +1,1 @@
+ActiveRecord::Base.establish_connection(APP_CONF['active_record'])

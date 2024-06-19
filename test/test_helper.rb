@@ -41,6 +41,5 @@ class BotTest < Minitest::Test
   end
 end
 
-Services.configure_services!
-FileUtils.rm_rf(Services.conf['active_record']['database'])
-Services.run_migrations!
+FileUtils.rm_rf(APP_CONF['active_record']['database'])
+run_migrations!

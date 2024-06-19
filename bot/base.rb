@@ -6,7 +6,6 @@ require_relative 'commands/media_download_controller'
 require_relative 'commands/user_controller'
 require_relative 'commands/questionnaire_controller'
 require_relative 'commands/animals_game_controller'
-require_relative 'commands/siiau_availability_controller'
 
 module BrodhaBot
   class AbortBot < StandardError
@@ -48,7 +47,6 @@ module BrodhaBot
       MediaDownloaderController.register_commands(self)
       QuestionnaireController.register_commands(self)
       UserController.register_commands(self)
-      SIIAUAvailabilityController.register_commands(self)
       AnimalsGameController.register_commands(self)
     end
 
@@ -79,11 +77,11 @@ module BrodhaBot
       end
 
       def start_daemons!
-        %i[run_reminders_daemon run_files_daemon run_siiau_daemon run_pending_downloads_daemon
+        %i[run_reminders_daemon run_files_daemon run_pending_downloads_daemon
           run_pending_downloads_daemon].each do |daemon|
           Thread.new do
             loop do
-              Services.bot.send(daemon)
+              BOT.send(daemon)
             rescue StandardError => e
               log_error('Error in daemon', daemon:, e:, trace: e.backtrace)
               sleep(60)
